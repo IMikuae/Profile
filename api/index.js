@@ -9,37 +9,51 @@ export default function handler(req, res) {
     return THUMBNAILS[Math.floor(Math.random() * THUMBNAILS.length)];
   }
 
-  function isBot(userAgent = "") {
-    const bots = [
-      "WhatsApp", "facebookexternalhit", "Twitterbot",
-      "TelegramBot", "Discordbot", "LinkedInBot"
+  // deteksi apakah request dari bot/fetch/axios
+  function isBotLike(headers) {
+    const ua = (headers["user-agent"] || "").toLowerCase();
+
+    // pola user-agent yang umum dipakai bot / fetch
+    const botKeywords = [
+      "node-fetch", "axios", "curl", "okhttp", "python",
+      "whatsapp", "facebookexternalhit", "telegram",
+      "discordbot", "twitterbot", "linkedinbot", "slackbot"
     ];
-    return bots.some(b => userAgent.includes(b));
+
+    if (botKeywords.some(b => ua.includes(b))) return true;
+
+    // request dari browser biasanya ada header ini
+    const isBrowserHeaders =
+      headers["sec-fetch-mode"] ||
+      headers["upgrade-insecure-requests"] ||
+      headers["accept-language"];
+
+    if (!isBrowserHeaders) return true;
+
+    return false;
   }
 
-  const ua = req.headers["user-agent"] || "";
-
-  if (isBot(ua)) {
-    // Kalau request dari bot → redirect ke random thumbnail
+  if (isBotLike(req.headers)) {
+    // 👉 kalau bot/fetch → redirect ke random thumbnail
     const img = randomThumb();
     res.writeHead(302, { Location: img });
     return res.end();
   }
 
-  // Kalau manusia → tampilkan HTML dashboard
+  // 👉 kalau manusia → tampilkan halaman utama
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.end(`
     <!doctype html>
     <html lang="id">
       <head>
         <meta charset="utf-8">
-        <title>Dashboard</title>
+        <title>Dashboard Utama</title>
       </head>
       <body style="font-family:sans-serif;text-align:center;padding:50px">
         <h1>🎉 Selamat datang di Dashboard</h1>
-        <p>Kalau link ini dibuka di browser → tampil HTML.</p>
-        <p>Kalau dikirim di WA/Telegram → tampil thumbnail random dari host lain.</p>
+        <p>Jika link ini dibuka oleh manusia, tampil halaman ini.</p>
+        <p>Jika link ini diambil oleh bot/fetch, diarahkan ke thumbnail random.</p>
       </body>
     </html>
   `);
-                     }
+}
