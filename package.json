@@ -1,0 +1,18 @@
+{
+  "name": "random-thumbnail-vercel",
+  "version": "1.0.0",
+  "description": "Website sederhana: kalau dibuka user tampil HTML, kalau dibaca bot tampil random thumbnail.",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "vercel dev",
+    "deploy": "vercel deploy --prod"
+  },
+  "keywords": [
+    "vercel",
+    "random",
+    "thumbnail",
+    "bot-detection"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
